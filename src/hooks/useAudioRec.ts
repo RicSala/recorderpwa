@@ -250,10 +250,6 @@ export const useAudioRecorder = (): AudioRecorderHook => {
         const url = URL.createObjectURL(audioBlob);
         _clearTimer();
 
-        // Test the audio blob by playing it
-        const audio = new Audio(url);
-        audio.play();
-
         setState((prev) => ({
           ...prev,
           status: 'stopped',

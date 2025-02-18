@@ -1,6 +1,6 @@
 'use client';
 
-import { Play, Trash2 } from 'lucide-react';
+import { Play, SquareIcon, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Pause } from 'lucide-react';
 import { AudioVisualizer } from 'react-audio-visualize';
@@ -40,6 +40,7 @@ export function NoteAudio({
     recordingBlob,
     status,
     currentDeviceLabel,
+    stopRecording,
   } = useAudioRecorder();
 
   const {
@@ -186,7 +187,7 @@ export function NoteAudio({
           className='flex items-center justify-center rounded-full bg-primary p-2 text-primary-foreground'
           onClick={handleToggleRecording}
         >
-          Record
+          {isRecording ? 'Pause' : 'Record'}
         </Button>
 
         <Button
@@ -197,6 +198,12 @@ export function NoteAudio({
           <Trash2 size={20} />
         </Button>
       </div>
+      <Button
+        className='flex h-10 w-10 items-center justify-center rounded-full bg-primary p-2 text-primary-foreground'
+        onClick={stopRecording}
+      >
+        <SquareIcon size={20} />
+      </Button>
     </div>
   );
 }
