@@ -44,7 +44,7 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     launch_handler: {
-      // @ts-ignore
+      // @ts-expect-error - TODO: fix this
       client_mode: 'navigate-existing',
     },
     dir: 'ltr',

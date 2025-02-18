@@ -25,6 +25,7 @@ self.addEventListener('message', (event) => {
   // Check if the message is requesting the service worker to skip waiting
   // This is part of the update process to activate a new service worker immediately
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    // @ts-expect-error - TODO: fix this
     self.skipWaiting(); // Activate the new service worker immediately
   }
 });
@@ -48,7 +49,9 @@ self.addEventListener('install', async (event) => {
 
 // Enable navigation preload if supported by the browser
 // Navigation preload starts loading resources while the service worker is starting up
+// @ts-expect-error - TODO: fix this
 if (workbox.navigationPreload.isSupported()) {
+  // @ts-expect-error - TODO: fix this
   workbox.navigationPreload.enable();
 }
 
@@ -79,6 +82,7 @@ self.addEventListener('fetch', (event) => {
           const networkResp = await fetch(event.request);
           return networkResp;
         } catch (error) {
+          console.error(error);
           // If both preload and network fail (user is offline)
           // Open our cache
           const cache = await caches.open(CACHE);
