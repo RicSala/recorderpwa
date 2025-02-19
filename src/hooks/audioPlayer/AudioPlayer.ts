@@ -17,10 +17,7 @@ interface AudioPlayerInternalState {
 }
 
 export class AudioPlayerError extends Error {
-  constructor(
-    message: string,
-    public code: 'LOAD_ERROR' | 'PLAYBACK_ERROR'
-  ) {
+  constructor(message: string, public code: 'LOAD_ERROR' | 'PLAYBACK_ERROR') {
     super(message);
     this.name = 'AudioPlayerError';
   }
@@ -220,9 +217,11 @@ export class AudioPlayer {
     if (!this.audio.context || !this.audio.buffer || this.state.isPlaying)
       return;
 
+    console.log('playing');
     try {
       // Resume context before playing
       await this.audio.context.resume();
+      console.log('resumed');
 
       this.audio.source = this.setupSource();
       if (!this.audio.source) return;
@@ -236,6 +235,7 @@ export class AudioPlayer {
         startTime,
       });
     } catch (error) {
+      console.log('error', error);
       this.handleError(error, 'PLAYBACK_ERROR');
     }
   }

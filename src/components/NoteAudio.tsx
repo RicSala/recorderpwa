@@ -1,7 +1,7 @@
 'use client';
 
 import { Play, SquareIcon, Trash2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pause } from 'lucide-react';
 import { AudioVisualizer } from 'react-audio-visualize';
 
@@ -9,7 +9,7 @@ import { Button } from './ui/button';
 import { cn } from '../lib/utils';
 import { useAudioPlayer } from '../hooks/audioPlayer/useAudioPlayer';
 import { NoteLiveAudioVisualizer } from './NoteLiveAudioVisualizer';
-import { useAudioRecorder } from '../hooks/useAudioRec';
+import { useAudioRecorderAlt } from '@/hooks/useAudioRecAlt';
 
 type NoteAudioModProps = {
   showNudge?: boolean;
@@ -41,7 +41,7 @@ export function NoteAudio({
     status,
     currentDeviceLabel,
     stopRecording,
-  } = useAudioRecorder();
+  } = useAudioRecorderAlt();
 
   const {
     isPlaying,
@@ -63,7 +63,9 @@ export function NoteAudio({
 
   // sync the displayed blob with the audio blob
   useEffect(() => {
+    console.log('recordingBlob', recordingBlob);
     if (recordingBlob) {
+      console.log('setting displayed blob');
       setDisplayedBlob(recordingBlob);
     }
   }, [recordingBlob]);
@@ -105,19 +107,28 @@ export function NoteAudio({
   };
 
   const handleToggleRecording = () => {
-    if (!recordingBlob && !isRecording) {
+    if (status === 'idle') {
       startRecording();
-    } else if (isRecording) {
-      togglePauseResume();
     } else {
+      console.log('togglePauseResume');
       togglePauseResume();
     }
   };
 
+  const recordingUrl = useMemo(() => {
+    if (recordingBlob) {
+      return URL.createObjectURL(recordingBlob);
+    }
+    return null;
+  }, [recordingBlob]);
+
   const togglePlayPause = () => {
+    console.log('togglePlayPause');
     if (isPlaying) {
+      console.log('pausing');
       pause();
     } else {
+      console.log('playing');
       play();
     }
   };
@@ -137,19 +148,29 @@ export function NoteAudio({
       >
         <div className='h-3 w-3 rounded-full bg-primary' />
         {isRecording ? 'Grabando' : 'En espera'}
-        {JSON.stringify({
-          recorderStatus: mediaRecorder?.state,
-          blobUrl: audioUrl,
-        })}
-        Mic:{currentDeviceLabel}
       </div>
+      <pre>
+        {JSON.stringify(
+          {
+            Mic: currentDeviceLabel,
+            status,
+            mediaRecorder: mediaRecorder?.mimeType,
+            recorderStatus: mediaRecorder?.state,
+            blobUrl: audioUrl?.slice(-5),
+            displayedBlob: displayedBlob?.size,
+            isReady,
+          },
+          null,
+          2
+        )}
+      </pre>
       <div
         className={cn('relative h-24 w-48 max-w-full rounded-md bg-indigo-100')}
       >
         <NoteLiveAudioVisualizer
           className={cn(`absolute inset-0 mx-auto overflow-hidden`, {
             'opacity-100': isRecording,
-            'opacity-0': !isRecording && displayedBlob,
+            'opacity-0': status === 'paused',
           })}
           status={status}
           mediaRecorder={mediaRecorder}
@@ -174,7 +195,7 @@ export function NoteAudio({
         <Button
           className='flex h-10 w-10 items-center justify-center rounded-full bg-primary p-2 text-primary-foreground'
           onClick={togglePlayPause}
-          disabled={!isReady || disabled}
+          // disabled={!isReady || disabled}
         >
           {isPlaying ? (
             <Pause className='h-4 w-4' />
@@ -204,6 +225,12 @@ export function NoteAudio({
       >
         <SquareIcon size={20} />
       </Button>
+      {recordingUrl && <audio src={recordingUrl} controls />}
+      {recordingUrl && (
+        <a href={recordingUrl} download='audio.webm'>
+          Download
+        </a>
+      )}
     </div>
   );
 }
